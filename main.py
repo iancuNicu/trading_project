@@ -6,9 +6,7 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def on_startup():
-    print("Application startup...")
     await create_db_and_tables()
-    print("Finished startup tasks.")
 
 @app.get("/")
 async def root():

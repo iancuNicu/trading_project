@@ -1,9 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from typing import Annotated
+from fastapi import Body
 
-class User(BaseModel):
-    email: str
+class UserResponse(BaseModel):
+    email: EmailStr
 
 class UserCreate(BaseModel):
-    email: str
+    email: EmailStr
+    password: str
+
+annotated_user_create = Annotated[UserCreate, Body(embed=True)]
 
 

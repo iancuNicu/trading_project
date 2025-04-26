@@ -1,27 +1,27 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from database import db_dependency
-from schemas.user import UserCreate
-from models.user import UserModel
 from starlette import status
 
+from utils.authentication import find_user
+from utils.auth_dependencies import verify_token
+from schemas.user import UserResponse
+
 router = APIRouter(
-    prefix="/users",
+    prefix="/user",
     tags=['user'],
     responses={404: {"description": "Not found"}},
 )
 
 @router.get("/")
-async def read_users():
-    return [{"username": "Rick"}, {"username": "Morty"}]
+async def read_user(db: db_dependency, token: str = Depends(verify_token)):
+   user = await find_user(token["sub"], db)
+   if not user:
+       raise HTTPException(
+           status_code=status.HTTP_401_UNAUTHORIZED,
+           detail="Invalid or expired token",
+           headers={"WWW-Authenticate": "Bearer"},
+       )
+   return UserResponse(email=user.email)
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserCreate, db: db_dependency):
-    print(user)
-    db_user = UserModel(email=user.email)
-    db.add(db_user)
-    await db.flush()
-    await db.refresh(db_user)
-
-    return db_user
 
 
