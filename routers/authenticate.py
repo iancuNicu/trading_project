@@ -3,7 +3,7 @@ from database import db_dependency
 
 from utils.authentication import (authenticate_user, create_access_token,
                                   find_user, create_hash_pass, create_refresh_token)
-from schemas.user import annotated_user_create
+from schemas.user import annotated_user_create, UserResponse
 from models.user import UserModel
 
 router = APIRouter(
@@ -25,8 +25,9 @@ async def login(user: annotated_user_create, db: db_dependency):
 
     token = create_access_token(data={"sub": user.email})
     ref_token = create_refresh_token(data={"sub": user.email})
+    user = UserResponse(email=user.email)
 
-    return {"access_token": token, "refresh_token": ref_token}
+    return {"access_token": token, "refresh_token": ref_token,"user": user}
 
 @router.post("/signup",  status_code=status.HTTP_201_CREATED)
 async def signup(user: annotated_user_create,  db: db_dependency):
@@ -45,5 +46,6 @@ async def signup(user: annotated_user_create,  db: db_dependency):
         await db.refresh(new_user)
         token = create_access_token(data={"sub": user.email})
         ref_token = create_refresh_token(data={"sub": user.email})
-        return {"access_token": token, "refresh_token": ref_token}
+        user = UserResponse(email=user.email)
+        return {"access_token": token, "refresh_token": ref_token, "user": user}
 
