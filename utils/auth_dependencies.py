@@ -26,9 +26,9 @@ def verify_token(token:str = Depends(oauth2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-async def verify_ref_token(token:str = Depends(oauth2_scheme)):
+def verify_ref_token(ref_token:str = Depends(oauth2_scheme)):
     try:
-        ref_payload = await jwt.verify(ref_token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
+        ref_payload = jwt.decode(ref_token, REFRESH_SECRET_KEY, algorithms=[ALGORITHM])
         return ref_payload
     except:
         raise HTTPException(
